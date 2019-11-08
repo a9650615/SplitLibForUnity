@@ -10,8 +10,8 @@ namespace SplitLib
 
     public class SplitViewLib
     {
-        public int pieceW = 20;
-        public int pieceH = 20;
+        public int pieceW = 10;
+        public int pieceH = 1;
         internal int lastWidth;
         internal int lastHeight;
         internal Texture2D screenShot;
@@ -43,35 +43,62 @@ namespace SplitLib
             //camera.Render();
 
             //SplitTexture();
-            //screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
-            int cutWidth = lastWidth / pieceW;
-            int cutHeight = lastHeight / pieceH;
-            for (var i = 0; i <= pieceH; i++)
-            {
-                int j;
-                for (j = 0; j < (pieceW / 2) - 1; j += 2)
-                {
-                    int posX = cutWidth * j;
-                    int posY = cutHeight * i;
-                    //copy left
-                    screenShot.ReadPixels(new Rect(posX, posY, cutWidth, cutHeight), posX, posY);
-                    //copy right
-                    screenShot.ReadPixels(new Rect(posX + resWidth / 2, posY, cutWidth, cutHeight), posX + cutWidth, posY);
-                }
+            screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+            Color[] pix = screenShot.GetPixels(0, 0, resWidth, resHeight, 0);
+            Color[] copyPix = (Color[])pix.Clone();
 
-                for (; j < pieceW; j += 2)
-                {
-                    int posX = cutWidth * j;
-                    int posY = cutHeight * i;
-                    //copy left
-                    screenShot.ReadPixels(new Rect(posX - (resWidth / 2) + cutWidth, posY, cutWidth, cutHeight), posX, posY);
-                    //copy right
-                    screenShot.ReadPixels(new Rect(posX + cutWidth, posY, cutWidth, cutHeight), posX + cutWidth, posY);
-                }
-                //Debug.Log(j);
-                //Debug.Log(pieceW);
+            // 防呆
+            if (pieceW > (resWidth / 2))
+            {
+                pieceW = resWidth / 2;
+            }
+            if (pieceH > (resHeight / 2))
+            {
+                pieceH = resHeight / 2;
             }
 
+            int cutWidth = lastWidth / pieceW;
+            int cutHeight = lastHeight / pieceH;
+            int splitWidth = resWidth / 2;
+            //Debug.Log(pix[0]);
+            for (var x = 0; x < resWidth; x++)
+            {
+                for (var y = 0; y < resHeight; y++)
+                {
+                    //copyPix[x + y * resWidth] = Color.black;
+                    int nowPart = x % cutWidth;
+                    // left view
+                    if (x < splitWidth)
+                    {
+                        // put first
+                        if (nowPart < cutWidth / 2)
+                        {
+                            copyPix[x + y * resWidth] = pix[x + y * resWidth];
+                            //copyPix[i + j] = new Color(0, 0, 0);
+                        }
+                        else
+                        {
+                            copyPix[x + y * resWidth] = pix[(x + splitWidth) + y * resWidth];
+                        }
+                    }
+                    else
+                    {
+                        // right
+                        if (nowPart < cutWidth / 2)
+                        {
+                            copyPix[x + y * resWidth] = pix[(x) + y * resWidth];
+                            //copyPix[i + j] = new Color(0, 0, 0);
+                        }
+                        else
+                        {
+                            copyPix[x + y * resWidth] = pix[(x - splitWidth) + y * resWidth];
+                            //copyPix[i + j] = new Color(0, 0, 0);
+                            //copyPix[x + y * resWidth] = Color.blue;
+                        }
+                    }
+                }
+            }
+            screenShot.SetPixels(copyPix);
             //screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0); //Apply pixels from camera onto Texture2D
             screenShot.Apply();
 
