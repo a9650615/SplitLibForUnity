@@ -10,7 +10,7 @@ namespace SplitLib
 
     public class SplitViewLib
     {
-        public int pieceW = 5;
+        public int pieceW = 1000;
         public int pieceH = 1;
         internal int lastWidth;
         internal int lastHeight;
@@ -49,13 +49,9 @@ namespace SplitLib
                             {
                                 copyPix[x + splitWidth / 2 + y * resWidth] = inputColor[x + y * resWidth];
                             }
-
-                        }
-                        else
-                        {
-                            if (nowPart > cutWidth / 2)
+                            else
                             {
-                                copyPix[x - splitWidth / 2 + y * resWidth] = inputColor[(x) + y * resWidth];
+                                copyPix[x + splitWidth / 2 + y * resWidth] = inputColor[x + splitWidth + y * resWidth];
                             }
                         }
                     }
@@ -124,7 +120,7 @@ namespace SplitLib
                 pieceH = resHeight / 2;
             }
 
-            Color[] copyPix = ProcessColor(pix, 2);
+            Color[] copyPix = ProcessColor(pix, 1);
 
             screenShot.SetPixels(copyPix);
             //screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0); //Apply pixels from camera onto Texture2D
