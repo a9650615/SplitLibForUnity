@@ -12,4 +12,10 @@
   <ItemGroup>
     <None Remove=".DS_Store" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="shader\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="shader\SplitShader.cs" />
+  </ItemGroup>
 </Project>

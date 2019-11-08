@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -9,13 +10,12 @@ namespace SplitLib
 
     public class SplitViewLib
     {
-        internal int piece = 4;
+        public int pieceW = 20;
+        public int pieceH = 20;
         internal int lastWidth;
         internal int lastHeight;
         internal Texture2D screenShot;
         internal RenderTexture rt;
-
-
 
         static void Main() { }
 
@@ -36,18 +36,20 @@ namespace SplitLib
                 lastWidth = resWidth;
                 lastHeight = resHeight;
                 rt = new RenderTexture(resWidth, resHeight, 24);
+                RenderTexture.active = rt;
                 screenShot.Resize(resWidth, resHeight);
             }
 
-            camera.Render();
+            //camera.Render();
 
-            RenderTexture.active = rt;
-
-            int cutWidth = resWidth / piece;
-            int cutHeight = resWidth / piece;
-            for (var i = 0; i < piece; i++)
+            //SplitTexture();
+            //screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+            int cutWidth = lastWidth / pieceW;
+            int cutHeight = lastHeight / pieceH;
+            for (var i = 0; i <= pieceH; i++)
             {
-                for (var j = 0; j < piece / 2; j += 2)
+                int j;
+                for (j = 0; j < (pieceW / 2) - 1; j += 2)
                 {
                     int posX = cutWidth * j;
                     int posY = cutHeight * i;
@@ -57,21 +59,21 @@ namespace SplitLib
                     screenShot.ReadPixels(new Rect(posX + resWidth / 2, posY, cutWidth, cutHeight), posX + cutWidth, posY);
                 }
 
-                for (var j = piece / 2; j < piece; j += 2)
+                for (; j < pieceW; j += 2)
                 {
                     int posX = cutWidth * j;
                     int posY = cutHeight * i;
                     //copy left
-                    screenShot.ReadPixels(new Rect(posX - resWidth / piece, posY, cutWidth, cutHeight), posX, posY);
+                    screenShot.ReadPixels(new Rect(posX - (resWidth / 2) + cutWidth, posY, cutWidth, cutHeight), posX, posY);
                     //copy right
                     screenShot.ReadPixels(new Rect(posX + cutWidth, posY, cutWidth, cutHeight), posX + cutWidth, posY);
                 }
+                //Debug.Log(j);
+                //Debug.Log(pieceW);
             }
 
             //screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0); //Apply pixels from camera onto Texture2D
             screenShot.Apply();
-
-
 
             //outPutView.texture = (Texture)screenShot;
             //byte[] _bytes = screenShot.EncodeToPNG();
