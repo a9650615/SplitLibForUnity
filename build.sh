@@ -1,0 +1,1 @@
+csc SplitViewLib.cs -r:/Applications/Unity/Unity.app/Contents/Managed/UnityEngine.dll -out:SplitViewLib.dll
