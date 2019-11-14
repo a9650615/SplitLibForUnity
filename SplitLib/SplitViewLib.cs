@@ -7,15 +7,16 @@ using UnityEngine;
 
 namespace SplitLib
 {
-
     public class SplitViewLib
     {
-        public int pieceW = 1000;
+        public int pieceW = 100;
         public int pieceH = 1;
+        private GameObject bindObject;
         internal int lastWidth;
         internal int lastHeight;
         internal Texture2D screenShot;
         internal RenderTexture rt;
+        internal CameraControl camCtrl;
 
         static void Main() { }
 
@@ -23,6 +24,12 @@ namespace SplitLib
         {
             screenShot = new Texture2D(100, 100, TextureFormat.RGB24, false);
             rt = new RenderTexture(100, 100, 24);
+        }
+
+        public void BindObjectToCamera(GameObject targetObject)
+        {
+            bindObject = targetObject;
+            camCtrl = new CameraControl(bindObject);
         }
 
         private Color[] ProcessColor(Color[] inputColor, int type)
@@ -52,6 +59,21 @@ namespace SplitLib
                             else
                             {
                                 copyPix[x + splitWidth / 2 + y * resWidth] = inputColor[x + splitWidth + y * resWidth];
+                            }
+                        }
+                    }
+                    else if (type == 3)
+                    { // put left
+                        if (x < splitWidth)
+                        {
+                            // put first
+                            if (nowPart < cutWidth / 2)
+                            {
+                                copyPix[x + y * resWidth] = inputColor[x + y * resWidth];
+                            }
+                            else
+                            {
+                                copyPix[x + y * resWidth] = inputColor[x + splitWidth + y * resWidth];
                             }
                         }
                     }
@@ -120,7 +142,7 @@ namespace SplitLib
                 pieceH = resHeight / 2;
             }
 
-            Color[] copyPix = ProcessColor(pix, 1);
+            Color[] copyPix = ProcessColor(pix, 2);
 
             screenShot.SetPixels(copyPix);
             //screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0); //Apply pixels from camera onto Texture2D
@@ -136,6 +158,26 @@ namespace SplitLib
             //Destroy(rt); //Free memory
             return screenShot;
         }
-    }
 
+        public void GetOutPutTextureFromTexture()
+        {
+            int resWidth = Screen.width;
+            int resHeight = Screen.height;
+            if (lastWidth != resWidth || lastHeight != resHeight)
+            {
+                lastWidth = resWidth * 2;
+                lastHeight = resHeight;
+            }
+            // 防呆
+            if (pieceW > (resWidth))
+            {
+                pieceW = resWidth;
+            }
+            if (pieceH > (resHeight))
+            {
+                pieceH = resHeight;
+            }
+            camCtrl.UpdateLastScreen(ProcessColor(camCtrl.UpdateCameraViewToTexture(), 3));
+        }
+    }
 }
