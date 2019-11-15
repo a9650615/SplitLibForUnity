@@ -167,7 +167,7 @@ namespace SplitLib
             return screenShot;
         }
 
-        public void GetOutPutTextureFromTexture()
+        public void UpdateOutputScreen()
         {
             int resWidth = Screen.width;
             int resHeight = Screen.height;
