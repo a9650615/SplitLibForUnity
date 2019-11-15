@@ -34,7 +34,7 @@ namespace SplitLib
             cameraLeft.cullingMask &= ~(1 << 5); // except UI layer
 
             GameObject rightObject = new GameObject();
-            //rightObject.hideFlags = HideFlags.HideInHierarchy;
+            rightObject.hideFlags = HideFlags.HideInHierarchy;
             cameraRight = rightObject.AddComponent<Camera>();
             cameraRight.name = "right";
             cameraRight.transform.SetParent(cameraLeft.transform);
@@ -45,8 +45,10 @@ namespace SplitLib
 
             /** Setup canvas for output **/
             GameObject outputCameraObject = new GameObject();
+            outputCameraObject.hideFlags = HideFlags.HideInHierarchy;
             outputCamera = outputCameraObject.AddComponent<Camera>();
             outputCamera.clearFlags = CameraClearFlags.Nothing;
+            outputCamera.name = "outputCamera";
 
             outputCanvas = new GameObject();
             outputCanvas.AddComponent<Canvas>();
@@ -55,7 +57,7 @@ namespace SplitLib
             outputCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
             outputCanvas.GetComponent<Canvas>().worldCamera = outputCamera;
             outputCanvas.GetComponent<Canvas>().planeDistance = 2;
-            //outputCanvas.hideFlags = HideFlags.HideInHierarchy;
+            outputCanvas.hideFlags = HideFlags.HideInHierarchy;
             outputCanvas.layer = 5;
 
             outputImage = new GameObject().AddComponent<RawImage>();
