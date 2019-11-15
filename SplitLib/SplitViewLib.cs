@@ -26,7 +26,7 @@ namespace SplitLib
             rt = new RenderTexture(100, 100, 24);
         }
 
-        public void BindObjectToCamera(GameObject targetObject)
+        public void BindCamera(GameObject targetObject)
         {
             bindObject = targetObject;
             camCtrl = new CameraControl(bindObject);
@@ -34,7 +34,15 @@ namespace SplitLib
 
         private Color[] ProcessColor(Color[] inputColor, int type)
         {
-            Color[] copyPix = (Color[])Array.CreateInstance(typeof(Color), inputColor.Length);
+            Color[] copyPix;
+            if (type == 3)
+            {
+                copyPix = (Color[])Array.CreateInstance(typeof(Color), inputColor.Length / 2);
+            }
+            else
+            {
+                copyPix = (Color[])Array.CreateInstance(typeof(Color), inputColor.Length);
+            }
             int resWidth = lastWidth;
             int resHeight = lastHeight;
             int cutWidth = lastWidth / pieceW;
@@ -69,11 +77,11 @@ namespace SplitLib
                             // put first
                             if (nowPart < cutWidth / 2)
                             {
-                                copyPix[x + y * resWidth] = inputColor[x + y * resWidth];
+                                copyPix[x + y * splitWidth] = inputColor[x + y * resWidth];
                             }
                             else
                             {
-                                copyPix[x + y * resWidth] = inputColor[x + splitWidth + y * resWidth];
+                                copyPix[x + y * splitWidth] = inputColor[x + splitWidth + y * resWidth];
                             }
                         }
                     }
@@ -163,7 +171,7 @@ namespace SplitLib
         {
             int resWidth = Screen.width;
             int resHeight = Screen.height;
-            if (lastWidth != resWidth || lastHeight != resHeight)
+            if (lastWidth != resWidth * 2 || lastHeight != resHeight)
             {
                 lastWidth = resWidth * 2;
                 lastHeight = resHeight;

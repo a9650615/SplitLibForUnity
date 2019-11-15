@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,9 +29,16 @@ namespace SplitLib
             outputScreen = new Texture2D(viewWidth * 2, viewHeight);
             lastScreen = new Texture2D(viewWidth, viewHeight);
 
-            cameraLeft_Texture = new RenderTexture(Screen.width, Screen.height, 24);
-            cameraRight_Texture = new RenderTexture(Screen.width, Screen.height, 24);
-            cameraLeft = targetObj.AddComponent<Camera>();
+            cameraLeft_Texture = new RenderTexture(viewWidth, viewHeight, 24);
+            cameraRight_Texture = new RenderTexture(viewWidth, viewHeight, 24);
+            if (targetObj.GetComponent<Camera>())
+            {
+                cameraLeft = targetObj.GetComponent<Camera>();
+            }
+            else
+            {
+                cameraLeft = targetObj.AddComponent<Camera>();
+            }
             cameraLeft.cullingMask &= ~(1 << 5); // except UI layer
 
             GameObject rightObject = new GameObject();
@@ -49,34 +57,57 @@ namespace SplitLib
             outputCamera = outputCameraObject.AddComponent<Camera>();
             outputCamera.clearFlags = CameraClearFlags.Nothing;
             outputCamera.name = "outputCamera";
+            outputCamera.depth = 999;
+            outputCamera.cullingMask = (1 << 5); // Only UI layer
 
             outputCanvas = new GameObject();
             outputCanvas.AddComponent<Canvas>();
             outputCanvas.name = "outputCanvas";
-            outputCanvas.transform.position = new Vector3(99, 99, 99);
+            outputCanvas.transform.localPosition = new Vector3(99, 99, 99);
             outputCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
             outputCanvas.GetComponent<Canvas>().worldCamera = outputCamera;
             outputCanvas.GetComponent<Canvas>().planeDistance = 2;
-            outputCanvas.hideFlags = HideFlags.HideInHierarchy;
             outputCanvas.layer = 5;
+            SceneVisibilityManager.instance.Hide(outputCanvas, true);
 
-            outputImage = new GameObject().AddComponent<RawImage>();
+            GameObject imageObj = new GameObject();
+            //imageObj.hideFlags = HideFlags.HideAndDontSave;
+
+            outputImage = imageObj.AddComponent<RawImage>();
             outputImage.transform.SetParent(outputCanvas.transform);
+            SceneVisibilityManager.instance.Hide(imageObj, false);
             outputImage.rectTransform.localPosition = new Vector3(0, 0, 0);
             outputImage.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             outputImage.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             outputImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             outputImage.rectTransform.localScale = new Vector3(1, 1, 1);
-            //outputImage.rectTransform.offsetMin = new Vector2(0, 0);
-            //outputImage.rectTransform.offsetMax = new Vector2(0, 0);
             outputImage.texture = lastScreen;
             //outputImage.uvRect = new Rect(0, 0, 1, 1);
             outputImage.SetNativeSize();
             outputImage.GetComponent<RectTransform>().sizeDelta = new Vector2(viewWidth, viewHeight);
+            outputCanvas.hideFlags = HideFlags.HideInHierarchy;
+        }
+
+        private void UpdateEnv()
+        {
+            if (viewWidth != Screen.width || viewHeight != Screen.height)
+            {
+                viewWidth = Screen.width;
+                viewHeight = Screen.height;
+                outputScreen.Resize(viewWidth * 2, viewHeight);
+                lastScreen.Resize(viewWidth, viewHeight);
+                cameraLeft_Texture = new RenderTexture(viewWidth, viewHeight, 24);
+                cameraRight_Texture = new RenderTexture(viewWidth, viewHeight, 24);
+                cameraLeft.targetTexture = cameraLeft_Texture;
+                cameraRight.targetTexture = cameraRight_Texture;
+                outputImage.SetNativeSize();
+                outputImage.GetComponent<RectTransform>().sizeDelta = new Vector2(viewWidth, viewHeight);
+            }
         }
 
         public Color[] UpdateCameraViewToTexture()
         {
+            UpdateEnv();
             RenderTexture.active = cameraLeft_Texture;
             outputScreen.ReadPixels(new Rect(0, 0, viewWidth, viewHeight), 0, 0);
             RenderTexture.active = cameraRight_Texture;
