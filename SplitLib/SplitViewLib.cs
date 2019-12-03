@@ -24,15 +24,25 @@ namespace SplitLib
         {
             screenShot = new Texture2D(100, 100, TextureFormat.RGB24, false);
             rt = new RenderTexture(100, 100, 24);
+            camCtrl = new CameraControl();
         }
 
         public void BindCamera(GameObject targetObject)
         {
             bindObject = targetObject;
-            camCtrl = new CameraControl(bindObject);
+
+            camCtrl.BindCamera(bindObject);
         }
 
-        private Color[] ProcessColor(Color[] inputColor, int type)
+        public void BindCanvas(GameObject targetObject)
+        {
+            if (targetObject.GetComponent<Canvas>())
+            {
+                camCtrl.BindCanvas(targetObject);
+            }
+        }
+
+        private Color[] ProcessColor(Color[] inputColor, int type, params Color[] mixColors)
         {
             Color[] copyPix;
             if (type == 3)
@@ -74,6 +84,16 @@ namespace SplitLib
                     { // put left
                         if (x < splitWidth)
                         {
+                            Color pixelColor;
+                            if (x > splitWidth)
+                            {
+                                pixelColor = mixColors[x / 2 + y * splitWidth];
+                            }
+                            else
+                            {
+                                pixelColor = mixColors[x + y * splitWidth];
+                            }
+
                             // put first
                             if (nowPart < cutWidth / 2)
                             {
@@ -83,6 +103,14 @@ namespace SplitLib
                             {
                                 copyPix[x + y * splitWidth] = inputColor[x + splitWidth + y * resWidth];
                             }
+
+
+                            if (pixelColor != Color.clear)
+                            {
+                                copyPix[x + y * splitWidth] = (copyPix[x + y * splitWidth] + pixelColor);
+                                //copyPix[x + y * splitWidth] = Color.Lerp(pixelColor, copyPix[x + y * splitWidth], 0f);
+                            }
+                            
                         }
                     }
                     else
@@ -185,7 +213,7 @@ namespace SplitLib
             {
                 pieceH = resHeight;
             }
-            camCtrl.UpdateLastScreen(ProcessColor(camCtrl.UpdateCameraViewToTexture(), 3));
+            camCtrl.UpdateLastScreen(ProcessColor(camCtrl.UpdateCameraViewToTexture(), 3, camCtrl.GetCanvasColor()));
         }
     }
 }

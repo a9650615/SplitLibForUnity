@@ -22,6 +22,7 @@ using SplitLib;
 
 public class TestScript : MonoBehaviour
 {
+    public GameObject bindCanvas;
     private SplitViewLib SplitLib;
     
     void Start()
@@ -33,6 +34,7 @@ public class TestScript : MonoBehaviour
          * if this element is not camera, will add camera component on it
          */
         SplitLib.BindCamera(gameObject);
+        splitViewLib.BindCanvas(bindCanvas);
     }
 
     // Update is called once per frame
