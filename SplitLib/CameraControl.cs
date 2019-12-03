@@ -57,7 +57,7 @@ namespace SplitLib
             inputCanvas.renderMode = RenderMode.ScreenSpaceCamera;
             inputCanvas.worldCamera = inputCanvasCamera;
 
-            //HideGameObject(inputCanvasCameraObj); //Hide camera
+            HideGameObject(inputCanvasCameraObj); //Hide camera
         }
 
         private void HideGameObject(GameObject obj, bool hideVisibility = false)
@@ -90,6 +90,8 @@ namespace SplitLib
             cameraRight.name = "right";
             cameraRight.transform.SetParent(cameraLeft.transform);
             cameraRight.transform.localPosition = new Vector3(0.2f, 0, 0);
+            Vector3 newRotation = new Vector3(targetObj.transform.eulerAngles.x, targetObj.transform.eulerAngles.y, targetObj.transform.eulerAngles.z);
+            cameraRight.transform.eulerAngles = newRotation;
             cameraRight.cullingMask &= ~(1 << 5); // except UI layer
             cameraLeft.targetTexture = cameraLeft_Texture;
             cameraRight.targetTexture = cameraRight_Texture;
