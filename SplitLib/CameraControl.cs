@@ -57,7 +57,7 @@ namespace SplitLib
             inputCanvas.renderMode = RenderMode.ScreenSpaceCamera;
             inputCanvas.worldCamera = inputCanvasCamera;
 
-            HideGameObject(inputCanvasCameraObj); //Hide camera
+            //HideGameObject(inputCanvasCameraObj); //Hide camera
         }
 
         private void HideGameObject(GameObject obj, bool hideVisibility = false)
@@ -67,7 +67,7 @@ namespace SplitLib
             {
                 if (Type.GetType("SceneVisibilityManager") != null)
                 {
-                    SceneVisibilityManager.instance.Hide(obj, true);
+                    //SceneVisibilityManager.instance.Hide(obj, true);
                 }
             }
         }
@@ -141,10 +141,11 @@ namespace SplitLib
                 lastScreen.Resize(viewWidth, viewHeight);
                 cameraLeft_Texture = new RenderTexture(viewWidth, viewHeight, 24);
                 cameraRight_Texture = new RenderTexture(viewWidth, viewHeight, 24);
-                canvasTexture2d = new Texture2D(viewWidth, viewHeight);
+                canvasTexture2d.Resize(viewWidth, viewHeight);
                 canvas_Texture = new RenderTexture(viewWidth, viewHeight, 24, RenderTextureFormat.ARGB32);
                 cameraLeft.targetTexture = cameraLeft_Texture;
                 cameraRight.targetTexture = cameraRight_Texture;
+                inputCanvasCamera.targetTexture = canvas_Texture;
                 outputImage.SetNativeSize();
                 outputImage.GetComponent<RectTransform>().sizeDelta = new Vector2(viewWidth, viewHeight);
             }
