@@ -1,5 +1,10 @@
-﻿using System;
+﻿#if DEBUG
+    #define UNITY_EDITOR
+#endif
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -62,15 +67,13 @@ namespace SplitLib
             HideGameObject(inputCanvasCameraObj); //Hide camera
         }
 
+        [ExecuteInEditMode]
         private void HideGameObject(GameObject obj, bool hideVisibility = false)
         {
             obj.hideFlags = HideFlags.HideInHierarchy;
             if (hideVisibility)
             {
-                if (Type.GetType("SceneVisibilityManager") != null)
-                {
-                    //SceneVisibilityManager.instance.Hide(obj, true);
-                }
+                //SceneVisibilityManager.instance.Hide(obj, false);
             }
         }
 
@@ -115,6 +118,9 @@ namespace SplitLib
             outputCamera.cullingMask = (1 << 8); // Only UI layer
 
             outputCanvas = new GameObject();
+            //#if UNITY_EDITOR
+            //    SceneVisibilityManager.instance.Hide(outputCanvas, false);
+            //#endif
             outputCanvas.AddComponent<Canvas>();
             outputCanvas.name = "outputCanvas";
             outputCanvas.transform.localPosition = new Vector3(99, 99, 99);
@@ -129,7 +135,10 @@ namespace SplitLib
 
             outputImage = imageObj.AddComponent<RawImage>();
             outputImage.transform.SetParent(outputCanvas.transform);
-            //SceneVisibilityManager.instance.Hide(imageObj, false);
+
+            #if UNITY_EDITOR
+                SceneVisibilityManager.instance.Hide(imageObj, false);
+            #endif
             outputImage.rectTransform.localPosition = new Vector3(0, 0, 0);
             outputImage.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             outputImage.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
@@ -139,7 +148,6 @@ namespace SplitLib
             //outputImage.uvRect = new Rect(0, 0, 1, 1);
             outputImage.SetNativeSize();
             outputImage.GetComponent<RectTransform>().sizeDelta = new Vector2(viewWidth, viewHeight);
-            HideGameObject(imageObj);
         }
 
         private void UpdateEnv()

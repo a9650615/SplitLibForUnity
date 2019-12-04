@@ -3,9 +3,12 @@ SplitViewLib
 
 Usage:
 
-- Put SplitViewLib.dll into your unity project
-- Ensure you enable it
-![](https://i.imgur.com/BugWe5B.jpg)
+- Put SplitViewLib_DEV.dll into your unity project
+- Ensure you enable it on editor mode
+![](https://i.imgur.com/B5yn6ej.png)
+- Put SplitViewLib_RELEASE.dll into your unity project 
+- Exclude on editor mode
+![](https://i.imgur.com/Tg7DpcO.png)
 - Using SplitLib
 ```c#
 using SplitLib;
@@ -13,8 +16,12 @@ using SplitLib;
 
 Example usage:
 ===
-v0.3.0
+v0.3.1
 ---
+```
+Usage Update: Need to bind type on the constructor.
+```
+
 - Create script like below
 ```c#
 using SplitLib;
