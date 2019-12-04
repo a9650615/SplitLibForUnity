@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace SplitLib
 {
-    public class SplitViewLib
+    public class SplitViewLib<T>
     {
         public int pieceW = 100;
         public int pieceH = 1;
@@ -16,16 +16,29 @@ namespace SplitLib
         internal int lastHeight;
         internal Texture2D screenShot;
         internal RenderTexture rt;
-        internal CameraControl camCtrl;
+        internal CameraControl<T> camCtrl;
+        internal T targetClass;
 
         static void Main() { }
 
-        public SplitViewLib()
+        private void Init()
         {
             screenShot = new Texture2D(100, 100, TextureFormat.RGB24, false);
             rt = new RenderTexture(100, 100, 24);
-            camCtrl = new CameraControl();
         }
+
+        private SplitViewLib()
+        {
+
+        }
+
+        public SplitViewLib(T tgs)
+        {
+            targetClass = tgs;
+            Init();
+            camCtrl = new CameraControl<T>(tgs);
+        }
+
 
         public void BindCamera(GameObject targetObject)
         {
@@ -110,7 +123,7 @@ namespace SplitLib
                                 copyPix[x + y * splitWidth] = (copyPix[x + y * splitWidth] + pixelColor);
                                 //copyPix[x + y * splitWidth] = Color.Lerp(pixelColor, copyPix[x + y * splitWidth], 0f);
                             }
-                            
+
                         }
                     }
                     else

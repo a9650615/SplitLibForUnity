@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace SplitLib
 {
 
-    internal class CameraControl
+    internal class CameraControl<T>
     {
         GameObject outputCanvas;
         Camera cameraLeft;
@@ -24,9 +24,11 @@ namespace SplitLib
         private int viewWidth;
         private int viewHeight;
         RawImage outputImage;
+        private T targetClass;
 
-        public CameraControl()
+        public CameraControl(T tgs)
         {
+            targetClass = tgs;
             viewWidth = Screen.width;
             viewHeight = Screen.height;
 
@@ -72,6 +74,8 @@ namespace SplitLib
             }
         }
 
+        int count = 0;
+
         public void BindCamera(GameObject targetObj)
         {
             if (targetObj.GetComponent<Camera>())
@@ -84,9 +88,14 @@ namespace SplitLib
             }
             cameraLeft.cullingMask &= ~(1 << 5); // except UI layer
 
-            GameObject rightObject = new GameObject();
+            GameObject rightObject = UnityEngine.Object.Instantiate(targetObj) as GameObject;
+            UnityEngine.Object.Destroy(rightObject.GetComponent(targetClass.GetType()));
+            if (rightObject.GetComponent<AudioListener>())
+            {
+                rightObject.GetComponent<AudioListener>().enabled = false;
+            }
             rightObject.hideFlags = HideFlags.HideInHierarchy;
-            cameraRight = rightObject.AddComponent<Camera>();
+            cameraRight = rightObject.GetComponent<Camera>();
             cameraRight.name = "right";
             cameraRight.transform.SetParent(cameraLeft.transform);
             cameraRight.transform.localPosition = new Vector3(0.2f, 0, 0);
