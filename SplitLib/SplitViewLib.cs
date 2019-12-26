@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Threading;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -18,6 +19,11 @@ namespace SplitLib
         internal RenderTexture rt;
         internal CameraControl<T> camCtrl;
         internal T targetClass;
+        private Thread processer;
+        private Color[] cameraOut;
+        private Color[] canvasOut;
+        private Color[] outputScreen;
+        private Boolean needUpdateView = true;
 
         static void Main() { }
 
@@ -25,6 +31,7 @@ namespace SplitLib
         {
             screenShot = new Texture2D(100, 100, TextureFormat.RGB24, false);
             rt = new RenderTexture(100, 100, 24);
+            processer = new Thread(_processOutputScreen) { Name = "Thread 1" };
         }
 
         private SplitViewLib()
@@ -37,6 +44,7 @@ namespace SplitLib
             targetClass = tgs;
             Init();
             camCtrl = new CameraControl<T>(tgs);
+            processer.Start();
         }
 
 
@@ -72,6 +80,7 @@ namespace SplitLib
             int cutHeight = lastHeight / pieceH;
             int splitWidth = lastWidth / 2;
             //Debug.Log(pix[0]);
+            Color pixelColor;
             for (var x = 0; x < lastWidth; x++)
             {
                 for (var y = 0; y < resHeight; y++)
@@ -97,32 +106,58 @@ namespace SplitLib
                     { // put left
                         if (x < splitWidth)
                         {
-                            Color pixelColor;
+                            int offset = x + y * splitWidth;
+                            int half_offset = x / 2 + y * splitWidth;
+                            //Color pixelColor;
                             if (x > splitWidth)
                             {
-                                pixelColor = mixColors[x / 2 + y * splitWidth];
+                                pixelColor = mixColors[half_offset];
                             }
                             else
                             {
-                                pixelColor = mixColors[x + y * splitWidth];
+                                pixelColor = mixColors[offset];
                             }
 
                             // put first
                             if (nowPart < cutWidth / 2)
                             {
-                                copyPix[x + y * splitWidth] = inputColor[x + y * resWidth];
+                                copyPix[offset] = inputColor[x + y * resWidth];
                             }
                             else
                             {
-                                copyPix[x + y * splitWidth] = inputColor[x + splitWidth + y * resWidth];
+                                copyPix[offset] = inputColor[x + splitWidth + y * resWidth];
                             }
 
 
                             if (pixelColor != Color.clear)
                             {
-                                copyPix[x + y * splitWidth] = (copyPix[x + y * splitWidth] + pixelColor);
+                                copyPix[offset] = (copyPix[offset] + pixelColor);
                                 //copyPix[x + y * splitWidth] = Color.Lerp(pixelColor, copyPix[x + y * splitWidth], 0f);
                             }
+
+                        }
+                    }
+                    else if (type == 4)
+                    {
+                        if (x < splitWidth)
+                        {
+                            int offset = x + y * splitWidth;
+
+                            // put first
+                            if (nowPart < cutWidth / 2)
+                            {
+                                copyPix[offset] = inputColor[x + y * resWidth] + mixColors[x % splitWidth + y * splitWidth];
+                            }
+                            else
+                            {
+                                copyPix[offset] = inputColor[x + splitWidth + y * resWidth] + mixColors[x % splitWidth + y * splitWidth];
+                            }
+
+
+                            //if (pixelColor != Color.clear)
+                            //{
+                            //    copyPix[offset] = (copyPix[offset] + pixelColor);
+                            //}
 
                         }
                     }
@@ -208,7 +243,7 @@ namespace SplitLib
             return screenShot;
         }
 
-        public void UpdateOutputScreen()
+        private void UpdateScreenSize()
         {
             int resWidth = Screen.width;
             int resHeight = Screen.height;
@@ -216,6 +251,9 @@ namespace SplitLib
             {
                 lastWidth = resWidth * 2;
                 lastHeight = resHeight;
+                rt = new RenderTexture(resWidth, resHeight, 24);
+                RenderTexture.active = rt;
+                screenShot.Resize(resWidth, resHeight);
             }
             // 防呆
             if (pieceW > (resWidth))
@@ -226,7 +264,41 @@ namespace SplitLib
             {
                 pieceH = resHeight;
             }
-            camCtrl.UpdateLastScreen(ProcessColor(camCtrl.UpdateCameraViewToTexture(), 3, camCtrl.GetCanvasColor()));
+        }
+
+        // Try to deal output pixels in new thread
+        private void _processOutputScreen()
+        {
+            do
+            {
+                if (!needUpdateView)
+                {
+                    outputScreen = ProcessColor(cameraOut, 4, canvasOut);
+                }
+
+                needUpdateView = true;
+
+                Thread.Sleep(5);
+            } while (true);
+        }
+
+        public void UpdateOutputScreen()
+        {
+            needUpdateView = true;
+            if (needUpdateView)
+            {
+                UpdateScreenSize();
+                canvasOut = camCtrl.GetCanvasColor();
+                cameraOut = camCtrl.UpdateCameraViewToTexture();
+                needUpdateView = false;
+                //outputScreen = ProcessColor(cameraOut, 4, canvasOut);
+                if (outputScreen != null && outputScreen.Length > 0)
+                {
+                    camCtrl.UpdateLastScreen(outputScreen);
+                }
+            }
+
+            //camCtrl.UpdateLastScreen(ProcessColor(camCtrl.UpdateCameraViewToTexture(), 2));
         }
     }
 }

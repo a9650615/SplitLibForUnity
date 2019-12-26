@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-    #define UNITY_EDITOR
+#define UNITY_EDITOR
 #endif
 
 #if UNITY_EDITOR
@@ -177,7 +177,7 @@ namespace SplitLib
             outputScreen.ReadPixels(new Rect(0, 0, viewWidth, viewHeight), 0, 0);
             RenderTexture.active = cameraRight_Texture;
             outputScreen.ReadPixels(new Rect(0, 0, viewWidth, viewHeight), viewWidth, 0);
-            outputScreen.Apply();
+            outputScreen.Apply(false, false);
 
             RenderTexture.active = null;
 
@@ -188,18 +188,19 @@ namespace SplitLib
         {
             RenderTexture.active = canvas_Texture;
             canvasTexture2d.ReadPixels(new Rect(0, 0, viewWidth, viewHeight), 0, 0);
-            canvasTexture2d.Apply();
+            Color[] pixels = canvasTexture2d.GetPixels(0, 0, viewWidth, viewHeight, 0); ;
+            canvasTexture2d.Apply(false, false);
             GL.Clear(true, true, Color.clear);
             RenderTexture.active = null;
 
-            return canvasTexture2d.GetPixels(0, 0, viewWidth, viewHeight, 0);
+            return pixels;
         }
 
         public void UpdateLastScreen(Color[] splitData)
         {
             //Graphics.CopyTexture(outputScreen, 0, 0, 0, 0, viewWidth, viewHeight, lastScreen, 0, 0, 0, 0);
             lastScreen.SetPixels(splitData);
-            lastScreen.Apply();
+            lastScreen.Apply(false, false);
         }
     }
 
